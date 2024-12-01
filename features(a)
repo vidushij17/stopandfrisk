@@ -1,0 +1,126 @@
+#cleaned again I noticed a few long decimals and that converting yes and no columns to 1 and 0 might make things easier:
+# Load the data
+df_cleaned = pd.read_csv("sqf-2023-cleaned.csv", na_values=["(null)", ""], low_memory=False)
+
+# List of columns with 'yes'/'no' values for binary encoding
+yes_no_columns = ['SUPERVISING_ACTION_CORRESPONDING_ACTIVITY_LOG_ENTRY_REVIEWED','OFFICER_EXPLAINED_STOP_FLAG', 
+                  'OTHER_PERSON_STOPPED_FLAG', 
+                  'SUSPECT_ARRESTED_FLAG', 'SUMMONS_ISSUED_FLAG', 
+                  'OFFICER_IN_UNIFORM_FLAG', 'FRISKED_FLAG', 
+                  'SEARCHED_FLAG', 'ASK_FOR_CONSENT_FLG', 
+                  'CONSENT_GIVEN_FLG', 'OTHER_CONTRABAND_FLAG', 
+                  'WEAPON_FOUND_FLAG', 'PHYSICAL_FORCE_VERBAL_INSTRUCTION_FLAG']
+
+# Data cleaning: Fill missing values and encode columns
+for col in df_cleaned.columns:
+    if pd.api.types.is_numeric_dtype(df_cleaned[col]):
+        # Fill numerical columns with the mean and round to 2 decimal places
+        mean_value = df_cleaned[col].mean()
+        df_cleaned[col].fillna(mean_value, inplace=True)
+        df_cleaned[col] = df_cleaned[col].round(2)
+    elif col in yes_no_columns:
+        # Convert 'yes'/'no' values to binary (1/0)
+        df_cleaned[col] = df_cleaned[col].map({'Y': 1, 'N': 0})
+    else:
+        # Fill categorical columns with the mode
+        mode = df_cleaned[col].mode()
+        if not mode.empty:
+            df_cleaned[col].fillna(mode[0], inplace=True)
+
+# Save the cleaned data
+df_cleaned.to_csv("sqf-2023-final-cleaned.csv", index=False)
+
+# Load the saved data to ensure the cleaning process worked
+df = pd.read_csv("sqf-2023-final-cleaned.csv", na_values=["(null)", ""], low_memory=False)
+
+# Check for any remaining null values
+total_null_or_empty = df.isnull().sum().sum()
+print(f"Total '(null)' or empty cells: {total_null_or_empty}")
+
+print(df.info())       # Check data types and null counts
+print(df.describe())   # Review statistics of numerical columns
+
+#features:
+#categorize time
+def categorize_time(time_str):
+    if time_str == "00:00:00":  # Special case for midnight
+        return 'Night'
+    hour = int(time_str.split(':')[0])
+    if 5 <= hour < 12:
+        return 'Morning'
+    elif 12 <= hour < 17:
+        return 'Afternoon'
+    elif 17 <= hour < 21:
+        return 'Evening'
+    else:
+        return 'Night'
+
+df_cleaned['TIME_OF_DAY'] = df_cleaned['STOP_FRISK_TIME'].apply(categorize_time)
+
+#categorize stop time
+
+def categorize_duration(duration):
+    if duration <= 5:
+        return 'Short'
+    elif 6 <= duration <= 15:
+        return 'Medium'
+    else:
+        return 'Long'
+
+df_cleaned['STOP_DURATION_CATEGORY'] = df_cleaned['STOP_DURATION_MINUTES'].apply(categorize_duration)
+
+#BMI of suspect
+
+def feet_to_meters(height_feet):
+    return height_feet * 0.3048  # 1 foot = 0.3048 meters
+
+def lbs_to_kg(weight_lbs):
+    return weight_lbs * 0.453592
+
+# Apply the conversion to the 'SUSPECT_WEIGHT' column
+df_cleaned['SUSPECT_WEIGHT_KG'] = df_cleaned['SUSPECT_WEIGHT'].apply(lbs_to_kg)
+df_cleaned['SUSPECT_HEIGHT_M'] = df_cleaned['SUSPECT_HEIGHT'].apply(feet_to_meters)
+df_cleaned['SUSPECT_BMI'] = (df_cleaned['SUSPECT_WEIGHT_KG'] / (df_cleaned['SUSPECT_HEIGHT_M'] ** 2)).round(2)
+
+#BMI categorization according to cdc:
+
+def categorize_bmi(bmi):
+    if bmi < 18.5:
+        return 'Underweight'
+    elif 18.5 <= bmi < 25:
+        return 'Healthy Weight'
+    elif 25 <= bmi < 30:
+        return 'Overweight'
+    elif 30 <= bmi < 35:
+        return 'Class 1 Obesity'
+    elif 35 <= bmi < 40:
+        return 'Class 2 Obesity'
+    else:
+        return 'Class 3 Obesity (Severe Obesity)'
+
+df_cleaned['BMI_CATEGORY'] = df_cleaned['SUSPECT_BMI'].apply(categorize_bmi)
+
+# Map demeanor to scores
+demeanor_mapping = {
+    'CALM': 1,
+    'COOPERATIVE': 1,
+    'EVASIVE': -1,
+    'UPSET': -1,
+    'YELLING': -2,
+    'VIGILANT': 0
+}
+
+df_cleaned['DEMEANOR_SCORE'] = df_cleaned['DEMEANOR_OF_PERSON_STOPPED'].map(demeanor_mapping).fillna(0)
+
+# Calculate Score
+df_cleaned['COMPLIANCE_SCORE'] = (
+    df_cleaned['DEMEANOR_SCORE'] +
+    df_cleaned['CONSENT_GIVEN_FLG'] -
+    df_cleaned['OTHER_CONTRABAND_FLAG']
+)
+
+# Save to a new CSV file
+df_cleaned.to_csv("sqf-2023-cleaned-with-features.csv", index=False)
+
+print("Updated DataFrame saved to 'sqf-2023-cleaned-with-features.csv'")
+print(df_cleaned[['TIME_OF_DAY', 'STOP_DURATION_CATEGORY', 'SUSPECT_BMI', 'BMI_CATEGORY', 'DEMEANOR_SCORE' , 'COMPLIANCE_SCORE']].head(10))
