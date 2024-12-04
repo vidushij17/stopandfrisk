@@ -1,0 +1,31 @@
+#binary
+df_cleaned['FRISKED_AND_ARRESTED'] = (df_cleaned['FRISKED_FLAG'] & df_cleaned['SUSPECT_ARRESTED_FLAG']).astype(int)
+#categorical
+def combine_flags_and(frisked, arrested):
+    if frisked and arrested:
+        return 'Frisked and Arrested'
+    elif frisked:
+        return 'Frisked Only'
+    elif arrested:
+        return 'Arrested Only'
+    else:
+        return 'Neither'
+
+df_cleaned['FRISKED_AND_ARRESTED_CAT'] = df_cleaned.apply(
+    lambda row: combine_flags_and(row['FRISKED_FLAG'], row['SUSPECT_ARRESTED_FLAG']), axis=1
+)
+
+sample:
+	FRISKED_AND_ARRESTED	FRISKED_AND_ARRESTED_CAT
+1	  0	Frisked Only
+2	  1	Frisked and Arrested
+3	  0	Frisked Only
+4	  0	Frisked Only
+5	  1	Frisked and Arrested
+6	  0	Frisked Only
+7	  0	Frisked Only
+8	  0	Neither
+9	  0	Frisked Only
+10	1	Frisked and Arrested
+11	1	Frisked and Arrested
+12	0	Frisked Only
