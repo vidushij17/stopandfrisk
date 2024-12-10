@@ -1,40 +1,19 @@
 # stopandfrisk
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Customer Churn Prediction for Telco Customer Churn
-This project aims to predict customer churn for a telecommunications company using a dataset from Kaggle. The model will help identify customers likely to discontinue the service, enabling proactive retention efforts.
+Frisk and Arrested Analysis
+This project addresses the complex issue of understanding the factors influencing police stop-and-frisk incidents in New York City. Using a dataset from NYPD.gov containing detailed records of frisk and arrested occurrences, our primary goal is to predict how factors, like demographic attributes, borough, time of day, or officer-reported justifications, affect possible suspects of being frisked and arrested..
 
 Dataset
-The dataset can be accessed from Kaggle: Telco Customer Churn Dataset
+The dataset can be accessed from https://www.nyc.gov/site/nypd/stats/reports-analysis/stopfrisk.page (Stop, Question and Frisk Data 2023 dataset) OR can be seen in the github titled sqf-2023.xlsx
 
 Setup Instructions
-1. Creating the Virtual Environment
-To isolate project dependencies, create a virtual environment:
-
-python -m venv venv
-2. Activating the Virtual Environment
-Activate the virtual environment with the following command:
-
-source ./venv/bin/activate
-3. Installing Required Libraries
+1. Installing Required Libraries
 Install all necessary libraries by running:
 
 pip install -r requirements.txt
-4. Running the Prediction Notebook
-Open and execute the customer_churn_prediction_CS210.ipynb Jupyter Notebook cell by cell to train and evaluate the model.
 
-Video Demo
+4. Running the Prediction Notebook
+Open and execute the sqf-2023-cleaned-with-features-FINAL_CODE.ipynb Jupyter Notebook cell by cell to clean and build features and see the general visualizations of the data.
+Next, go through each model(KNN, Logistic Regression, Random Forest) notebooks to build and run the models and their visualizations
+
+Video Demo(google drive link: https://drive.google.com/file/d/1Gs6D5wpxSsqz1taHQhNcBj5fHB_s7eRj/view?usp=sharing)
 Feel free to reach out if you have any questions or encounter any issues with the setup or execution.
