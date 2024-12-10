@@ -1,4 +1,19 @@
 # stopandfrisk
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 Customer Churn Prediction for Telco Customer Churn
 This project aims to predict customer churn for a telecommunications company using a dataset from Kaggle. The model will help identify customers likely to discontinue the service, enabling proactive retention efforts.
 
