@@ -12,7 +12,8 @@ Install all necessary libraries by running:
 pip install -r requirements.txt
 
 2. Running the Prediction Notebook
-Open and execute the sqf-2023-cleaned-with-features-FINAL_CODE.ipynb Jupyter Notebook cell by cell to clean and build features and see the general visualizations of the data.
+Open and execute the sqf-2023-cleaned-with-features-FINAL_CODE.ipynb Jupyter Notebook cell by cell to clean and build features and see the general visualizations of the data. Must have all other CSVs also downloaded, because they are called within this notebook.
+Check the General Graphs notebook to see graphs which relate to our data exploration and understanding.
 Next, go through each model(KNN, Logistic Regression, Random Forest) notebooks to build and run the models and their visualizations
 
 Video Demo(google drive link: https://drive.google.com/file/d/1Gs6D5wpxSsqz1taHQhNcBj5fHB_s7eRj/view?usp=sharing)
